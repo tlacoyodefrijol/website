@@ -1,0 +1,83 @@
+name: Test & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # -------------------------------------------------------------------
+  # Run tests on every push and pull request
+  # -------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm test
+
+  # -------------------------------------------------------------------
+  # Deploy to Gandi Simple Hosting — only on pushes to main
+  #
+  # Required GitHub secrets:
+  #   GANDI_SSH_KEY    — contents of your private SSH key (the matching
+  #                      public key must be added in the Gandi control
+  #                      panel under Simple Hosting → SSH keys)
+  #   GANDI_GIT_REMOTE — full git remote URL from Gandi, e.g.
+  #                      ssh+git://simple1234567@git.sd3.gpaas.net/default.git
+  #
+  # How to find GANDI_GIT_REMOTE:
+  #   Gandi admin → Simple Hosting instance → Git access → copy the URL.
+  #   The host suffix (sd2/sd3/sd5/sd6) depends on your data centre.
+  # -------------------------------------------------------------------
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history so git push doesn't fail
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build CSS
+        run: npm run css:build
+
+      # Include the freshly built CSS in what gets pushed to Gandi.
+      # Gandi runs `npm install` + `npm start` but does not run build scripts.
+      - name: Commit built assets
+        run: |
+          git config user.email "deploy@github-actions"
+          git config user.name "GitHub Actions"
+          git add -f public/style.min.css
+          git diff --staged --quiet || git commit -m "ci: build assets [skip ci]"
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.GANDI_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Extract the hostname from the remote URL and add its host key.
+          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|ssh+git://[^@]*@||;s|/.*||')
+          ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts
+
+      # Gandi Simple Hosting deploys from the 'master' branch.
+      - name: Push to Gandi
+        run: |
+          git remote add gandi "${{ secrets.GANDI_GIT_REMOTE }}"
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            git push gandi HEAD:master --force

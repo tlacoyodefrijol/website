@@ -1,0 +1,530 @@
+/* =============================================================
+   COLOUR TOKENS
+   #264653  — dark teal     (inactive nav, secondary text, blockquotes, tag-pill fill)
+   #2a9d8f  — bright teal   (section labels, dates, metadata)
+   #e9c46a  — gold          (tag badges — uses dark text)
+   #f4a261  — orange        (social links, CTAs, contact links)
+   #e76f51  — coral         (active/hover nav, content links, primary interactive)
+   #393e41  — charcoal      (body text — kept from previous palette)
+   #fafaf9  — near-white    (background)
+   ============================================================= */
+
+/* =============================================================
+   RESET & BASE
+   ============================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: #fafaf9;
+  color: #393e41;
+  line-height: 1.65;
+}
+
+a { color: inherit; }
+
+/* =============================================================
+   SITE HEADER — sticky top bar, name left · nav right
+   ============================================================= */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fafaf9;
+  border-bottom: 1px solid rgba(57, 62, 65, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 56px;
+}
+
+.site-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #393e41;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.site-nav {
+  display: flex;
+  gap: 2rem;
+}
+.site-nav a {
+  font-size: 0.975rem;
+  color: #264653;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.site-nav a:hover  { color: #e76f51; }
+.site-nav a.active {
+  color: #e76f51;
+  font-weight: 600;
+}
+
+/* =============================================================
+   MAIN CONTENT — centred column
+   ============================================================= */
+#app {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 6rem;
+}
+
+/* Narrower column for reading (posts, about, project list) */
+.content-col {
+  max-width: 680px;
+}
+
+/* =============================================================
+   SECTION HEADING — label + extending rule
+   ============================================================= */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2a9d8f;
+  margin-bottom: 2.5rem;
+}
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(57, 62, 65, 0.08);
+}
+
+/* =============================================================
+   HOME — hero + gallery
+   ============================================================= */
+.home-hero {
+  padding-bottom: 4rem;
+  margin-bottom: 4rem;
+  border-bottom: 1px solid rgba(57, 62, 65, 0.08);
+}
+
+.home-tagline {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: #393e41;
+  max-width: 680px;
+  margin-bottom: 1.75rem;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.75rem;
+  list-style: none;
+}
+.social-links a {
+  font-size: 0.875rem;
+  color: #f4a261;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 162, 97, 0.35);
+  padding-bottom: 1px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.social-links a:hover {
+  color: #e76f51;
+  border-color: #e76f51;
+}
+
+/* Gallery — 3 equal cards */
+.home-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.post-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(57, 62, 65, 0.08);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: border-color 0.15s;
+}
+.post-card:hover { border-color: rgba(231, 111, 81, 0.3); }
+
+.post-card-title {
+  font-size: 0.975rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.post-card-title a { text-decoration: none; color: #393e41; }
+.post-card-title a:hover { color: #e76f51; }
+
+.post-card-excerpt {
+  font-size: 0.825rem;
+  color: #264653;
+  line-height: 1.5;
+}
+
+.all-link {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #f4a261;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 162, 97, 0.35);
+  padding-bottom: 1px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.all-link:hover {
+  color: #e76f51;
+  border-color: #e76f51;
+}
+
+/* =============================================================
+   POST LIST — compact rows
+   ============================================================= */
+.post-list { list-style: none; }
+
+.post-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0 1.5rem;
+  align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(57, 62, 65, 0.06);
+}
+.post-item:first-child { padding-top: 0; }
+.post-item:last-child  { border-bottom: none; }
+
+.post-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.post-date {
+  font-size: 0.775rem;
+  color: #2a9d8f;
+  white-space: nowrap;
+}
+
+.post-title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.post-title a { text-decoration: none; color: #393e41; }
+.post-title a:hover {
+  color: #e76f51;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.post-excerpt {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: #264653;
+  line-height: 1.5;
+}
+
+.post-item-right {
+  min-width: 0;
+}
+
+/* =============================================================
+   SINGLE POST
+   ============================================================= */
+.post-single { }
+
+.back-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #264653;
+  text-decoration: none;
+  margin-bottom: 2.5rem;
+  transition: color 0.12s;
+}
+.back-link:hover {
+  color: #e76f51;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.post-single-header {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(57, 62, 65, 0.08);
+  max-width: 680px;
+}
+
+.post-single-date {
+  display: block;
+  font-size: 0.775rem;
+  color: #2a9d8f;
+  margin-bottom: 0.6rem;
+}
+
+.post-single-title {
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: #393e41;
+  margin-bottom: 0.85rem;
+}
+
+.post-body {
+  font-size: 1.0625rem;
+  line-height: 1.82;
+  color: #393e41;
+  max-width: 680px;
+}
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 2.25rem 0 0.75rem;
+  letter-spacing: -0.015em;
+  color: #393e41;
+}
+.post-body h1 { font-size: 1.5rem; }
+.post-body h2 { font-size: 1.25rem; }
+.post-body h3 { font-size: 1.1rem; }
+.post-body p  { margin-bottom: 1.35rem; }
+.post-body ul,
+.post-body ol { margin: 0 0 1.35rem 1.5rem; }
+.post-body li { margin-bottom: 0.4rem; }
+.post-body blockquote {
+  border-left: 2px solid #264653;
+  margin: 1.75rem 0;
+  padding: 0.25rem 1.5rem;
+  color: #264653;
+  font-style: italic;
+}
+.post-body pre {
+  background: rgba(42, 157, 143, 0.07);
+  border: 1px solid rgba(42, 157, 143, 0.15);
+  padding: 1.1rem 1.35rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 1.35rem;
+  font-size: 0.875rem;
+}
+.post-body code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85em;
+  background: rgba(42, 157, 143, 0.07);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+.post-body pre code { background: none; padding: 0; }
+.post-body a {
+  color: #e76f51;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.post-body a:hover { opacity: 0.75; }
+.post-body img { max-width: 100%; border-radius: 4px; margin: 1.5rem 0; display: block; }
+.post-body hr {
+  border: none;
+  border-top: 1px solid rgba(57, 62, 65, 0.08);
+  margin: 2.5rem 0;
+}
+
+/* =============================================================
+   TAG FILTER BAR
+   ============================================================= */
+.tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(38, 70, 83, 0.3);
+  background: rgba(38, 70, 83, 0.06);
+  color: #264653;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+.tag-pill:hover {
+  border-color: #e76f51;
+  color: #e76f51;
+  background: rgba(231, 111, 81, 0.06);
+}
+.tag-pill.active {
+  background: #264653;
+  border-color: #264653;
+  color: #fafaf9;
+}
+
+/* =============================================================
+   TAGS  (inline badges on items)
+   ============================================================= */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  list-style: none;
+  margin-top: 0.6rem;
+}
+.tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.6rem;
+  background: #e9c46a;
+  color: #393e41;
+  border-radius: 9999px;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  text-decoration: none;
+}
+a.tag:hover { opacity: 0.82; }
+
+/* =============================================================
+   OTHERS (Projects)
+   ============================================================= */
+.project-list { list-style: none; }
+
+.project-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0 1.5rem;
+  align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(57, 62, 65, 0.06);
+}
+.project-item:first-child { padding-top: 0; }
+.project-item:last-child  { border-bottom: none; }
+
+.project-year {
+  font-size: 0.775rem;
+  color: #2a9d8f;
+  white-space: nowrap;
+}
+
+.project-right { min-width: 0; }
+
+.project-title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #393e41;
+}
+.project-title a { text-decoration: none; color: #393e41; }
+.project-title a:hover {
+  color: #e76f51;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.project-desc {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: #264653;
+  line-height: 1.5;
+}
+
+/* =============================================================
+   ABOUT
+   ============================================================= */
+.about-body {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: #393e41;
+  max-width: 640px;
+}
+.about-body p { margin-bottom: 1rem; }
+.about-body a {
+  color: #e76f51;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.about-body a:hover { opacity: 0.75; }
+.about-body code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85em;
+  background: rgba(42, 157, 143, 0.07);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+.contact-links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1.75rem;
+}
+.contact-links a {
+  font-size: 0.875rem;
+  color: #f4a261;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 162, 97, 0.35);
+  padding-bottom: 1px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.contact-links a:hover {
+  color: #e76f51;
+  border-color: #e76f51;
+}
+
+/* =============================================================
+   STATE MESSAGES
+   ============================================================= */
+.loading, .empty {
+  font-size: 0.875rem;
+  color: #264653;
+  padding: 2rem 0;
+}
+.error {
+  font-size: 0.875rem;
+  color: #e76f51;
+  padding: 2rem 0;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+
+/* Tablet — collapse 3-col gallery to 2 */
+@media (max-width: 780px) {
+  .home-gallery { grid-template-columns: repeat(2, 1fr); }
+  #app { padding: 3rem 1.75rem 5rem; }
+  .site-header { padding: 0 1.75rem; }
+}
+
+/* Post/project list — stack meta above content */
+@media (max-width: 640px) {
+  .post-item,
+  .project-item {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+  .home-gallery { grid-template-columns: 1fr; }
+  .home-tagline { font-size: 1.5rem; }
+}
+
+/* Mobile nav */
+@media (max-width: 480px) {
+  .site-header { padding: 0 1.25rem; height: 52px; }
+  .site-nav { gap: 1.25rem; }
+  .site-nav a { font-size: 0.9rem; }
+  #app { padding: 2rem 1.25rem 4rem; }
+}
