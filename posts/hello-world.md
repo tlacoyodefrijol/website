@@ -8,4 +8,4 @@ tags: [meta]
 
 So this is the first entry on a new website. I can't even remember when was the last time I had a personal website. Does MySpace count? It had A LOT of HTML snips so I'd say it does. Anyway, this is a Hello World. I'll keep this as a sort of personal diary of things I like, things I work on and we'll see where it goes. 
 
-![Sad monkey saying Hello](https://media1.tenor.com/m/Rd_Vc7hf7jUAAAAd/stan-twitter-monkey.gif)
+![Sad monkey saying Hello](/hello-world-monkey.gif)

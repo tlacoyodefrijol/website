@@ -1,4 +1,5 @@
 import { formatDate, renderTags, collectTags } from './utils.js';
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@13.0.3/lib/marked.esm.js';
 
 // ---------------------------------------------------------------------------
 // Edit these to personalise the home page
@@ -98,7 +99,7 @@ async function renderEntry(section, slug, buildMeta) {
   }
 
   const { meta, content } = data;
-  const body = typeof marked !== 'undefined' ? marked.parse(content) : `<pre>${content}</pre>`;
+  const body = marked.parse(content);
   const sectionLabel = section.charAt(0).toUpperCase() + section.slice(1);
 
   setApp(`
@@ -221,7 +222,7 @@ async function renderPost(slug) {
   }
 
   const { meta, content } = data;
-  const body = typeof marked !== 'undefined' ? marked.parse(content) : `<pre>${content}</pre>`;
+  const body = marked.parse(content);
 
   setApp(`
     <div class="post-single">
