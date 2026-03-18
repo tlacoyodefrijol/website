@@ -12,12 +12,14 @@ jobs:
   # -------------------------------------------------------------------
   test:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - run: npm ci
@@ -31,16 +33,14 @@ jobs:
   #                      public key must be added in the Gandi control
   #                      panel under Simple Hosting → SSH keys)
   #   GANDI_GIT_REMOTE — full git remote URL from Gandi, e.g.
-  #                      ssh+git://simple1234567@git.sd3.gpaas.net/default.git
-  #
-  # How to find GANDI_GIT_REMOTE:
-  #   Gandi admin → Simple Hosting instance → Git access → copy the URL.
-  #   The host suffix (sd2/sd3/sd5/sd6) depends on your data centre.
+  #                      git+ssh://<uuid>@git.sd6.gpaas.net/default.git
   # -------------------------------------------------------------------
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - run: npm ci
@@ -71,8 +71,8 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.GANDI_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          # Extract the hostname from the remote URL and add its host key.
-          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|ssh+git://[^@]*@||;s|/.*||')
+          # Works for both git+ssh:// and ssh+git:// URL formats.
+          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
           ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts
 
       # Gandi Simple Hosting deploys from the 'master' branch.
