@@ -71,13 +71,17 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.GANDI_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          # Print the public key fingerprint so you can cross-check with Gandi.
+          ssh-keygen -lf ~/.ssh/deploy_key
           # Works for both git+ssh:// and ssh+git:// URL formats.
           GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
+          echo "Scanning host: $GANDI_HOST"
           ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts
+          echo "known_hosts populated: $(wc -l < ~/.ssh/known_hosts) entries"
 
       # Gandi Simple Hosting deploys from the 'master' branch.
       - name: Push to Gandi
         run: |
           git remote add gandi "${{ secrets.GANDI_GIT_REMOTE }}"
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+          GIT_SSH_COMMAND="ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             git push gandi HEAD:master --force
