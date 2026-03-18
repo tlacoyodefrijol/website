@@ -365,5 +365,35 @@ function router() {
   else                                               renderHome();
 }
 
+// ---------------------------------------------------------------------------
+// Hamburger toggle (tablet / mobile)
+// ---------------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.querySelector('.nav-toggle');
+  const nav    = document.querySelector('.site-nav');
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener('click', () => {
+    const isOpen = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen);
+  });
+
+  // Close the nav when a link is tapped
+  nav.addEventListener('click', e => {
+    if (e.target.tagName === 'A') {
+      nav.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.site-header')) {
+      nav.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
 window.addEventListener('hashchange', router);
 document.addEventListener('DOMContentLoaded', router);
