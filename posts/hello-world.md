@@ -6,32 +6,6 @@ description: The first post on this site.
 tags: [meta]
 ---
 
-This is the first post. Edit or delete this file at `posts/hello-world.md`.
+So this is the first entry on a new website. I can't even remember when was the last time I had a personal website. Does MySpace count? It had A LOT of HTML snips so I'd say it does. Anyway, this is a Hello World. I'll keep this as a sort of personal diary of things I like, things I work on and we'll see where it goes. 
 
-To add a new post, create a new `.md` file in the `posts/` directory with this frontmatter at the top:
-
-```yaml
----
-title: Your Post Title
-date: YYYY-MM-DD
-slug: your-post-slug
-description: A short summary shown on the post list.
-tags: [tag1, tag2]
----
-```
-
-The filename should match the `slug` field (e.g. `slug: my-first-post` → `posts/my-first-post.md`).
-
-## Markdown works
-
-You can use **bold**, _italic_, `inline code`, and more.
-
-- List items
-- Work too
-
-> Blockquotes look like this.
-
-```js
-// Code blocks with syntax highlighting
-console.log('hello');
-```
+![Sad monkey saying Hello](https://media1.tenor.com/m/Rd_Vc7hf7jUAAAAd/stan-twitter-monkey.gif)
