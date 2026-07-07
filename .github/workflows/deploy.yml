@@ -66,22 +66,18 @@ jobs:
           git add -f public/style.min.css
           git diff --staged --quiet || git commit -m "ci: build assets [skip ci]"
 
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.GANDI_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          # Print the public key fingerprint so you can cross-check with Gandi.
-          ssh-keygen -lf ~/.ssh/deploy_key
-          # Works for both git+ssh:// and ssh+git:// URL formats.
-          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
-          echo "Scanning host: $GANDI_HOST"
-          ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts
-          echo "known_hosts populated: $(wc -l < ~/.ssh/known_hosts) entries"
-
-      # Gandi Simple Hosting deploys from the 'master' branch.
+      # Gandi Simple Hosting deploys from the 'master' branch. It authenticates
+      # git over SSH with a personal access token used as the SSH *password*
+      # (Gandi's default deploy-token method), fed non-interactively via sshpass.
+      # Secret GANDI_TOKEN = the token from the hosting's "Deploy your code" panel.
       - name: Push to Gandi
+        env:
+          SSHPASS: ${{ secrets.GANDI_TOKEN }}
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           git remote add gandi "${{ secrets.GANDI_GIT_REMOTE }}"
-          GIT_SSH_COMMAND="ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+          GIT_SSH_COMMAND="sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes" \
             git push gandi HEAD:master --force
