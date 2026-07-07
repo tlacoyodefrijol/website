@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, renderTags, collectTags } from '../public/utils.js';
+import { formatDate, renderTags, collectTags, esc } from '../public/utils.js';
+
+describe('esc', () => {
+  it('escapes HTML-significant characters', () => {
+    expect(esc('<script>"&"</script>')).toBe('&lt;script&gt;&quot;&amp;&quot;&lt;/script&gt;');
+  });
+  it('handles null/undefined as empty string', () => {
+    expect(esc(null)).toBe('');
+    expect(esc(undefined)).toBe('');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // formatDate

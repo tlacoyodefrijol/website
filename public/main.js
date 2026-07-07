@@ -1,4 +1,4 @@
-import { formatDate, renderTags, collectTags } from './utils.js';
+import { formatDate, renderTags, collectTags, esc } from './utils.js';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@13.0.3/lib/marked.esm.js';
 
 // ---------------------------------------------------------------------------
@@ -29,7 +29,7 @@ function tagFilterBar(allTags, active, baseUrl) {
   const pills = [
     `<a href="${baseUrl}" class="tag-pill${!active ? ' active' : ''}">All</a>`,
     ...allTags.map(t =>
-      `<a href="${baseUrl}?tag=${encodeURIComponent(t)}" class="tag-pill${t === active ? ' active' : ''}">${t}</a>`
+      `<a href="${baseUrl}?tag=${encodeURIComponent(t)}" class="tag-pill${t === active ? ' active' : ''}">${esc(t)}</a>`
     ),
   ].join('');
   return `<div class="tag-filter-bar">${pills}</div>`;
@@ -70,7 +70,7 @@ async function renderList(section, label, mapItem, activeTag) {
   const filterBar = tagFilterBar(allTags, activeTag, `#${section}`);
   const listHtml  = filtered.length
     ? `<ul class="project-list">${filtered.map(mapItem).join('')}</ul>`
-    : `<p class="empty">${activeTag ? `No entries tagged "${activeTag}".` : 'Nothing here yet.'}</p>`;
+    : `<p class="empty">${activeTag ? `No entries tagged "${esc(activeTag)}".` : 'Nothing here yet.'}</p>`;
 
   setApp(`
     <div class="content-col">
@@ -139,8 +139,8 @@ async function renderHome() {
   const cards = posts.slice(0, 3).map(p => `
     <article class="post-card">
       <span class="post-date">${formatDate(p.date)}</span>
-      <h2 class="post-card-title"><a href="#thoughts/${p.slug}">${p.title}</a></h2>
-      ${p.description ? `<p class="post-card-excerpt">${p.description}</p>` : ''}
+      <h2 class="post-card-title"><a href="#thoughts/${p.slug}">${esc(p.title)}</a></h2>
+      ${p.description ? `<p class="post-card-excerpt">${esc(p.description)}</p>` : ''}
       ${renderTags(p.tags, '#thoughts/all')}
     </article>
   `).join('');
@@ -190,13 +190,13 @@ async function renderPostList(activeTag = null) {
               ${renderTags(p.tags, '#thoughts/all')}
             </div>
             <div class="post-item-right">
-              <p class="post-title"><a href="#thoughts/${p.slug}">${p.title}</a></p>
-              ${p.description ? `<p class="post-excerpt">${p.description}</p>` : ''}
+              <p class="post-title"><a href="#thoughts/${p.slug}">${esc(p.title)}</a></p>
+              ${p.description ? `<p class="post-excerpt">${esc(p.description)}</p>` : ''}
             </div>
           </li>
         `).join('')}
        </ul>`
-    : `<p class="empty">No posts tagged "${activeTag}".</p>`;
+    : `<p class="empty">No posts tagged "${esc(activeTag)}".</p>`;
 
   setApp(`
     <div class="content-col">
@@ -229,7 +229,7 @@ async function renderPost(slug) {
       <a href="#thoughts/all" class="back-link">← All thoughts</a>
       <header class="post-single-header">
         <span class="post-single-date">${formatDate(meta.date)}</span>
-        <h1 class="post-single-title">${meta.title}</h1>
+        <h1 class="post-single-title">${esc(meta.title)}</h1>
         ${renderTags(meta.tags, '#thoughts/all')}
       </header>
       <article class="post-body">${body}</article>
@@ -244,10 +244,10 @@ async function renderPost(slug) {
 function renderProjects(activeTag = null) {
   renderList('projects', 'Projects', p => `
     <li class="project-item">
-      <span class="project-year">${p.year || ''}</span>
+      <span class="project-year">${esc(p.year || '')}</span>
       <div class="project-right">
-        <p class="project-title"><a href="#projects/${p.slug}">${p.title}</a></p>
-        ${p.description ? `<p class="project-desc">${p.description}</p>` : ''}
+        <p class="project-title"><a href="#projects/${p.slug}">${esc(p.title)}</a></p>
+        ${p.description ? `<p class="project-desc">${esc(p.description)}</p>` : ''}
         ${renderTags(p.tags, '#projects')}
       </div>
     </li>
@@ -256,10 +256,10 @@ function renderProjects(activeTag = null) {
 
 function renderProjectEntry(slug) {
   renderEntry('projects', slug, meta => `
-    <span class="post-single-date">${meta.year ? String(meta.year) : formatDate(meta.date)}</span>
-    <h1 class="post-single-title">${meta.title}</h1>
-    ${meta.description ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${meta.description}</p>` : ''}
-    ${meta.url ? `<a href="${meta.url}" class="all-link" target="_blank" rel="noopener noreferrer">Visit project →</a>` : ''}
+    <span class="post-single-date">${meta.year ? esc(meta.year) : formatDate(meta.date)}</span>
+    <h1 class="post-single-title">${esc(meta.title)}</h1>
+    ${meta.description ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${esc(meta.description)}</p>` : ''}
+    ${meta.url ? `<a href="${esc(meta.url)}" class="all-link" target="_blank" rel="noopener noreferrer">Visit project →</a>` : ''}
     ${renderTags(meta.tags, '#projects')}
   `);
 }
@@ -271,10 +271,10 @@ function renderProjectEntry(slug) {
 function renderMusic(activeTag = null) {
   renderList('music', 'Music', m => `
     <li class="project-item">
-      <span class="project-year">${m.year || ''}</span>
+      <span class="project-year">${esc(m.year || '')}</span>
       <div class="project-right">
-        <p class="project-title"><a href="#music/${m.slug}">${m.title}</a></p>
-        ${m.artist ? `<p class="project-desc">${m.artist}</p>` : ''}
+        <p class="project-title"><a href="#music/${m.slug}">${esc(m.title)}</a></p>
+        ${m.artist ? `<p class="project-desc">${esc(m.artist)}</p>` : ''}
         ${renderTags(m.tags, '#music')}
       </div>
     </li>
@@ -283,10 +283,10 @@ function renderMusic(activeTag = null) {
 
 function renderMusicEntry(slug) {
   renderEntry('music', slug, meta => `
-    <span class="post-single-date">${meta.year ? String(meta.year) : formatDate(meta.date)}</span>
-    <h1 class="post-single-title">${meta.title}</h1>
-    ${meta.artist ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${meta.artist}</p>` : ''}
-    ${meta.url ? `<a href="${meta.url}" class="all-link" target="_blank" rel="noopener noreferrer">Listen →</a>` : ''}
+    <span class="post-single-date">${meta.year ? esc(meta.year) : formatDate(meta.date)}</span>
+    <h1 class="post-single-title">${esc(meta.title)}</h1>
+    ${meta.artist ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${esc(meta.artist)}</p>` : ''}
+    ${meta.url ? `<a href="${esc(meta.url)}" class="all-link" target="_blank" rel="noopener noreferrer">Listen →</a>` : ''}
     ${renderTags(meta.tags, '#music')}
   `);
 }
@@ -298,10 +298,10 @@ function renderMusicEntry(slug) {
 function renderPhotography(activeTag = null) {
   renderList('photography', 'Photography', p => `
     <li class="project-item">
-      <span class="project-year">${p.year || ''}</span>
+      <span class="project-year">${esc(p.year || '')}</span>
       <div class="project-right">
-        <p class="project-title"><a href="#photography/${p.slug}">${p.title}</a></p>
-        ${p.location ? `<p class="project-desc">${p.location}</p>` : ''}
+        <p class="project-title"><a href="#photography/${p.slug}">${esc(p.title)}</a></p>
+        ${p.location ? `<p class="project-desc">${esc(p.location)}</p>` : ''}
         ${renderTags(p.tags, '#photography')}
       </div>
     </li>
@@ -310,10 +310,10 @@ function renderPhotography(activeTag = null) {
 
 function renderPhotoEntry(slug) {
   renderEntry('photography', slug, meta => `
-    <span class="post-single-date">${meta.year ? String(meta.year) : formatDate(meta.date)}</span>
-    <h1 class="post-single-title">${meta.title}</h1>
-    ${meta.location ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${meta.location}</p>` : ''}
-    ${meta.url ? `<a href="${meta.url}" class="all-link" target="_blank" rel="noopener noreferrer">View photos →</a>` : ''}
+    <span class="post-single-date">${meta.year ? esc(meta.year) : formatDate(meta.date)}</span>
+    <h1 class="post-single-title">${esc(meta.title)}</h1>
+    ${meta.location ? `<p class="post-excerpt" style="margin-bottom:0.75rem">${esc(meta.location)}</p>` : ''}
+    ${meta.url ? `<a href="${esc(meta.url)}" class="all-link" target="_blank" rel="noopener noreferrer">View photos →</a>` : ''}
     ${renderTags(meta.tags, '#photography')}
   `);
 }

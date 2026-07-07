@@ -1,6 +1,15 @@
 // Pure utility functions — ES module used by browser and tests
 
 /**
+ * Escape a value for safe interpolation into HTML text or a quoted attribute.
+ * Frontmatter and URL-query values pass through here before hitting innerHTML.
+ */
+export function esc(s) {
+  return String(s ?? '').replace(/[<>&"]/g, c =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+}
+
+/**
  * Format an ISO date string into "DD Month YYYY" (e.g. "17 March 2026").
  * Noon-anchored to avoid UTC off-by-one in Western timezones.
  * Returns the original string if the date is invalid.
@@ -31,8 +40,8 @@ export function renderTags(tags = [], linkBase = null) {
   if (!tags || !tags.length) return '';
   const items = tags.map(t => {
     const inner = linkBase
-      ? `<a href="${linkBase}?tag=${encodeURIComponent(t)}" class="tag">${t}</a>`
-      : `<span class="tag">${t}</span>`;
+      ? `<a href="${linkBase}?tag=${encodeURIComponent(t)}" class="tag">${esc(t)}</a>`
+      : `<span class="tag">${esc(t)}</span>`;
     return `<li>${inner}</li>`;
   });
   return `<ul class="tags">${items.join('')}</ul>`;
