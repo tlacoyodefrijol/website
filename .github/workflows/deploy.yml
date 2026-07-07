@@ -68,16 +68,20 @@ jobs:
 
       # Gandi Simple Hosting deploys from the 'master' branch. It authenticates
       # git over SSH with a personal access token used as the SSH *password*
-      # (Gandi's default deploy-token method), fed non-interactively via sshpass.
+      # (Gandi's default deploy-token method). We feed it non-interactively via
+      # SSH_ASKPASS — robust to the server's prompt wording, unlike sshpass.
       # Secret GANDI_TOKEN = the token from the hosting's "Deploy your code" panel.
       - name: Push to Gandi
         env:
-          SSHPASS: ${{ secrets.GANDI_TOKEN }}
+          GANDI_TOKEN: ${{ secrets.GANDI_TOKEN }}
+          GANDI_REMOTE: ${{ secrets.GANDI_GIT_REMOTE }}
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
-          GANDI_HOST=$(echo "${{ secrets.GANDI_GIT_REMOTE }}" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
+          GANDI_HOST=$(echo "$GANDI_REMOTE" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
           mkdir -p ~/.ssh
           ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          git remote add gandi "${{ secrets.GANDI_GIT_REMOTE }}"
-          GIT_SSH_COMMAND="sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes" \
+          printf '#!/bin/sh\nprintf "%%s\\n" "$GANDI_TOKEN"\n' > "$RUNNER_TEMP/askpass.sh"
+          chmod +x "$RUNNER_TEMP/askpass.sh"
+          git remote add gandi "$GANDI_REMOTE"
+          SSH_ASKPASS="$RUNNER_TEMP/askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=:0 \
+          GIT_SSH_COMMAND="ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1" \
             git push gandi HEAD:master --force
