@@ -3,7 +3,7 @@ backend:
   repo: tlacoyodefrijol/website
   branch: main
   # GitHub OAuth handled by the sveltia-cms-auth Cloudflare Worker
-  base_url: https://sveltia-cms-auth.oscarmontiel.workers.dev
+  base_url: https://sveltia-cms-auth.oscarmontielnet.workers.dev
   auth_endpoint: auth
 
 # Images land in public/images and are referenced from the site as /images/…
