@@ -315,13 +315,20 @@ a { color: inherit; }
   height: 100%;
   object-fit: cover;
 }
-.post-single.has-hero {
+/* The article sits on a full-width band of the page background, so as it
+   scrolls up over the hero it reads as the page itself — not a floating
+   box. Text stays in the centered column. */
+.post-cover {
   position: relative;
   z-index: 1;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   background: var(--bg);
-  margin-top: -9vh;             /* pull the article up to overlap the hero */
-  padding-top: 2.5rem;
-  border-radius: 14px 14px 0 0;
+}
+.post-cover .post-single {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem clamp(1.25rem, 4vw, 2rem) 0;
 }
 
 .back-link {

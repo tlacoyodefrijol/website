@@ -113,16 +113,17 @@ async function renderEntry(section, slug, buildMeta) {
   const body = marked.parse(content);
   const sectionLabel = section.charAt(0).toUpperCase() + section.slice(1);
 
-  setApp(`
-    ${postHero(meta.image)}
-    <div class="post-single${meta.image ? ' has-hero' : ''}">
+  const inner = `
+    <div class="post-single">
       <a href="#${section}" class="back-link">← ${sectionLabel}</a>
       <header class="post-single-header">
         ${buildMeta(meta)}
       </header>
       <article class="post-body">${body}</article>
-    </div>
-  `);
+    </div>`;
+  setApp(meta.image
+    ? `${postHero(meta.image)}<div class="post-cover">${inner}</div>`
+    : inner);
 }
 
 // ---------------------------------------------------------------------------
@@ -238,9 +239,8 @@ async function renderPost(slug) {
   const { meta, content } = data;
   const body = marked.parse(content);
 
-  setApp(`
-    ${postHero(meta.image)}
-    <div class="post-single${meta.image ? ' has-hero' : ''}">
+  const inner = `
+    <div class="post-single">
       <a href="#thoughts/all" class="back-link">← All thoughts</a>
       <header class="post-single-header">
         <span class="post-single-date">${formatDate(meta.date)}</span>
@@ -248,8 +248,10 @@ async function renderPost(slug) {
         ${renderTags(meta.tags, '#thoughts/all')}
       </header>
       <article class="post-body">${body}</article>
-    </div>
-  `);
+    </div>`;
+  setApp(meta.image
+    ? `${postHero(meta.image)}<div class="post-cover">${inner}</div>`
+    : inner);
 }
 
 // ---------------------------------------------------------------------------
