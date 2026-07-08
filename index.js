@@ -62,7 +62,8 @@ if (OAUTH_CLIENT_ID && OAUTH_CLIENT_SECRET) {
     const url =
       'https://github.com/login/oauth/authorize' +
       `?client_id=${encodeURIComponent(OAUTH_CLIENT_ID)}` +
-      '&scope=repo' +
+      // public_repo is enough for a public repo; use 'repo' if it goes private.
+      '&scope=public_repo' +
       `&redirect_uri=${encodeURIComponent(redirectUri)}`;
     res.redirect(url);
   });
