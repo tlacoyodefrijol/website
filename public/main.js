@@ -19,17 +19,29 @@ const SOCIAL_LINKS = [
 function setApp(html) {
   document.getElementById('app').innerHTML = html;
   window.scrollTo(0, 0);
+  updateHeroParallax();
 }
 
 /**
- * Full-bleed post header image. It's sticky at the top and sits behind the
- * article, so the body (opaque bg) scrolls up over it — a CSS-only parallax
- * that makes the image "disappear". Returns '' when the post has no image.
+ * Full-bleed post header image that slides on scroll (parallax — see
+ * updateHeroParallax). Returns '' when the post has no image.
  */
 function postHero(image) {
   if (!image) return '';
   return `<div class="post-hero"><img src="${esc(image)}" alt=""></div>`;
 }
+
+// Slide the post hero image at a slower rate than the page as it scrolls.
+// ponytail: one passive, rAF-throttled scroll listener — cheapest real parallax.
+let heroTicking = false;
+function updateHeroParallax() {
+  const img = document.querySelector('.post-hero img');
+  if (img) img.style.transform = `translate3d(0, ${window.scrollY * 0.3}px, 0)`;
+  heroTicking = false;
+}
+window.addEventListener('scroll', () => {
+  if (!heroTicking) { requestAnimationFrame(updateHeroParallax); heroTicking = true; }
+}, { passive: true });
 
 /**
  * Build the tag filter bar — an "All" pill plus one pill per tag.
@@ -239,15 +251,30 @@ async function renderPost(slug) {
   const { meta, content } = data;
   const body = marked.parse(content);
 
+  // Find the next (older) post so we can link to it. Best-effort: if the
+  // list can't be fetched, we just omit the Next button.
+  let next = null;
+  try {
+    const posts = await fetchList('posts');
+    const i = posts.findIndex(p => p.slug === slug);
+    if (i !== -1 && i + 1 < posts.length) next = posts[i + 1];
+  } catch { /* no Next link */ }
+
+  const postNav = `
+    <nav class="post-nav">
+      <a href="#thoughts/all" class="back-link">← All thoughts</a>
+      ${next ? `<a href="#thoughts/${next.slug}" class="next-link">Next →</a>` : ''}
+    </nav>`;
+
   const inner = `
     <div class="post-single">
-      <a href="#thoughts/all" class="back-link">← All thoughts</a>
       <header class="post-single-header">
         <span class="post-single-date">${formatDate(meta.date)}</span>
         <h1 class="post-single-title">${esc(meta.title)}</h1>
         ${renderTags(meta.tags, '#thoughts/all')}
       </header>
       <article class="post-body">${body}</article>
+      ${postNav}
     </div>`;
   setApp(meta.image
     ? `${postHero(meta.image)}<div class="post-cover">${inner}</div>`

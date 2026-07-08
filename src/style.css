@@ -296,24 +296,26 @@ a { color: inherit; }
    SINGLE POST
    ============================================================= */
 
-/* Full-bleed hero — sticky behind the article; the body scrolls up over it
-   (CSS-only parallax "disappear"). Only present when the post has an image. */
+/* Full-bleed hero. The image is oversized and translated on scroll (see
+   main.js) so it slides at a slower rate than the page — a parallax that
+   glides up and away. Only present when the post has an image. */
 .post-hero {
-  position: sticky;
-  top: 0;
-  z-index: 0;
+  position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-top: -3.5rem;          /* cancel the #app top padding */
-  height: 58vh;
+  height: 85vh;
   overflow: hidden;
   background: var(--surface);
 }
 .post-hero img {
-  display: block;
+  position: absolute;
+  top: -30%;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 130%;                 /* extra height gives the slide room, no gaps */
   object-fit: cover;
+  will-change: transform;
 }
 /* The article sits on a full-width band of the page background, so as it
    scrolls up over the hero it reads as the page itself — not a floating
@@ -331,19 +333,32 @@ a { color: inherit; }
   padding: 3rem clamp(1.25rem, 4vw, 2rem) 0;
 }
 
-.back-link {
-  display: inline-block;
-  font-size: 0.8rem;
+/* Footer nav below the article: All thoughts (left) · Next (right) */
+.post-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.back-link,
+.next-link {
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-muted);
   text-decoration: none;
-  margin-bottom: 2.5rem;
   transition: color 0.12s;
 }
-.back-link:hover {
+.back-link:hover,
+.next-link:hover {
   color: #e76f51;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+.next-link { margin-left: auto; }
 
 .post-single-header {
   margin-bottom: 3rem;
@@ -575,7 +590,7 @@ a.tag:hover { opacity: 0.82; }
 
   .post-card-body { padding: 1.5rem 1.4rem; }
   .post-card-image img { height: 180px; }
-  .post-hero { height: 42vh; }
+  .post-hero { height: 62vh; }
 
   .post-item,
   .project-item {
