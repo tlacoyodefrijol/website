@@ -43,95 +43,82 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.65;
-  display: flex;
-  min-height: 100vh;
 }
 
 a { color: inherit; }
 
 /* =============================================================
-   SIDEBAR — fixed left column on desktop
+   HEADER — full-width sticky top bar: name left, nav right
    ============================================================= */
 .site-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 210px;
-  height: 100vh;
-  padding: 2.75rem 1.75rem;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
   z-index: 100;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 1.1rem clamp(1.25rem, 4vw, 3rem);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 
 .site-name {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
   letter-spacing: -0.01em;
-  line-height: 1.2;
-  margin-bottom: 3rem;
-  display: block;
 }
 
-/* Hamburger — hidden on desktop */
+/* Hamburger no longer used — nav is short enough to stay inline */
 .nav-toggle { display: none; }
 
 .site-nav {
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
 }
 
 .site-nav a {
-  font-size: 0.975rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
   text-decoration: none;
-  padding: 0.45rem 0.75rem;
-  margin-left: -0.75rem;
-  border-left: 2px solid transparent;
-  border-radius: 0 3px 3px 0;
-  transition: color 0.12s, border-color 0.12s;
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  transition: color 0.12s;
 }
 .site-nav a:hover  { color: #e76f51; }
-.site-nav a.active {
-  color: #e76f51;
-  font-weight: 600;
-  border-left-color: #e76f51;
-}
+.site-nav a.active { color: #e76f51; font-weight: 600; }
 
-/* Theme toggle — styled to match the nav links */
+/* Theme toggle — an inline nav item */
 .theme-toggle {
   font: inherit;
-  font-size: 0.975rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
   background: none;
   border: none;
   cursor: pointer;
-  text-align: left;
-  padding: 0.45rem 0.75rem;
-  margin: 1.5rem 0 0 -0.75rem;
+  padding: 0.4rem 0.7rem;
   transition: color 0.12s;
 }
 .theme-toggle:hover { color: #e76f51; }
 
 /* =============================================================
-   MAIN CONTENT — offset by sidebar width
+   MAIN CONTENT — centered reading column
    ============================================================= */
 #app {
-  margin-left: 210px;
-  flex: 1;
   width: 100%;
-  max-width: 900px;
-  padding: 4rem 3.5rem 6rem;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3.5rem clamp(1.25rem, 4vw, 2rem) 6rem;
 }
 
-/* Narrower column for reading */
-.content-col { max-width: 660px; }
+/* Content already sits in the centered #app column */
+.content-col { max-width: 100%; }
 
 /* =============================================================
    SECTION HEADING — label + extending rule
@@ -169,7 +156,7 @@ a { color: inherit; }
   line-height: 1.2;
   letter-spacing: -0.03em;
   color: var(--text);
-  max-width: 660px;
+  max-width: 100%;
   margin-bottom: 1.75rem;
 }
 
@@ -198,28 +185,36 @@ a { color: inherit; }
 }
 
 .post-card {
-  padding: 1.5rem 1.75rem;
+  padding: 1.9rem 2rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
   transition: border-color 0.15s;
 }
-.post-card:hover { border-color: rgba(231, 111, 81, 0.3); }
+.post-card:hover { border-color: rgba(231, 111, 81, 0.35); }
+
+/* Date reads as a small uppercase label above the title */
+.post-card .post-date {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
 
 .post-card-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1.35;
+  font-size: clamp(1.5rem, 3.5vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
 }
 .post-card-title a { text-decoration: none; color: var(--text); }
 .post-card-title a:hover { color: #e76f51; }
 
 .post-card-excerpt {
-  font-size: 0.925rem;
+  font-size: 1rem;
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .all-link {
@@ -304,7 +299,7 @@ a { color: inherit; }
   margin-bottom: 3rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--border);
-  max-width: 660px;
+  max-width: 100%;
 }
 
 .post-single-date {
@@ -327,7 +322,7 @@ a { color: inherit; }
   font-size: 1.0625rem;
   line-height: 1.82;
   color: var(--text);
-  max-width: 660px;
+  max-width: 100%;
 }
 .post-body h1,
 .post-body h2,
@@ -483,7 +478,7 @@ a.tag:hover { opacity: 0.82; }
   font-size: 1.0625rem;
   line-height: 1.8;
   color: var(--text);
-  max-width: 640px;
+  max-width: 100%;
 }
 .about-body p { margin-bottom: 1rem; }
 .about-body a { color: #e76f51; text-decoration: underline; text-underline-offset: 2px; }
@@ -520,106 +515,15 @@ a.tag:hover { opacity: 0.82; }
 .error { font-size: 0.875rem; color: #e76f51; padding: 2rem 0; }
 
 /* =============================================================
-   RESPONSIVE — tablet  ≤ 860px
-   Sidebar collapses into a sticky top bar + hamburger dropdown
-   ============================================================= */
-@media (max-width: 860px) {
-
-  body { display: block; }
-
-  /* Top bar */
-  .site-header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    height: 52px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.75rem;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    overflow: visible;
-  }
-
-  .site-name { margin-bottom: 0; font-size: 1rem; }
-
-  /* Hamburger button */
-  .nav-toggle {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    z-index: 110;
-  }
-  .nav-toggle span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text);
-    border-radius: 2px;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-  /* Animate to × when open */
-  .nav-toggle[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-  .nav-toggle[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  .nav-toggle[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-
-  /* Nav dropdown — hidden by default */
-  .site-nav {
-    display: none;
-    position: absolute;
-    top: 52px;
-    left: 0;
-    right: 0;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    flex-direction: column;
-    padding: 0.5rem 1.75rem 1rem;
-    box-shadow: 0 6px 16px var(--border);
-    gap: 0;
-  }
-  .site-nav.open { display: flex; }
-
-  .site-nav a {
-    padding: 0.7rem 0;
-    margin-left: 0;
-    border-left: none;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-  }
-  .site-nav a:last-child { border-bottom: none; }
-  .site-nav a.active { border-left: none; color: #e76f51; }
-
-  /* Content fills full width */
-  #app {
-    margin-left: 0;
-    padding: 3rem 1.75rem 5rem;
-    max-width: 100%;
-  }
-}
-
-/* =============================================================
-   RESPONSIVE — mobile  ≤ 540px
+   RESPONSIVE — the top bar (flex-wrap) and centered column
+   (clamp padding) already adapt; only the two-column list rows
+   and the hero tagline need tweaking on small screens.
    ============================================================= */
 @media (max-width: 540px) {
 
-  .site-header { padding: 0 1.25rem; }
-
-  #app { padding: 2.5rem 1.25rem 4rem; }
-
   .home-tagline { font-size: 1.5rem; }
+
+  .post-card { padding: 1.5rem 1.4rem; }
 
   .post-item,
   .project-item {
