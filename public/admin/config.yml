@@ -2,8 +2,8 @@ backend:
   name: github
   repo: tlacoyodefrijol/website
   branch: main
-  # OAuth relay lives on the site itself (see /auth and /callback in index.js)
-  base_url: https://oscarmontiel.net
+  # GitHub OAuth handled by the sveltia-cms-auth Cloudflare Worker
+  base_url: https://sveltia-cms-auth.oscarmontiel.workers.dev
   auth_endpoint: auth
 
 # Images land in public/images and are referenced from the site as /images/…

@@ -2,7 +2,6 @@ import express from 'express';
 import { readdir, readFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import https from 'https';
 import matter from 'gray-matter';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,91 +12,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // GET /ping — health check
 app.get('/ping', (_req, res) => res.send('pong'));
-
-// ---------------------------------------------------------------------------
-// GitHub OAuth relay for the Sveltia/Decap CMS at /admin.
-// Only mounted when credentials are present, so the site runs fine without it.
-// Set OAUTH_CLIENT_ID / OAUTH_CLIENT_SECRET (from a GitHub OAuth App whose
-// callback URL is https://<host>/callback) in the server environment.
-// ---------------------------------------------------------------------------
-const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } = process.env;
-
-// Exchange an OAuth code for an access token (Node 16-safe: uses https, not fetch).
-function githubExchange(code) {
-  const payload = JSON.stringify({
-    client_id: OAUTH_CLIENT_ID,
-    client_secret: OAUTH_CLIENT_SECRET,
-    code,
-  });
-  return new Promise((resolve, reject) => {
-    const req = https.request(
-      {
-        hostname: 'github.com',
-        path: '/login/oauth/access_token',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
-          'User-Agent': 'oscarmontiel-cms',
-        },
-      },
-      res => {
-        let body = '';
-        res.on('data', c => (body += c));
-        res.on('end', () => {
-          try { resolve(JSON.parse(body)); } catch (err) { reject(err); }
-        });
-      }
-    );
-    req.on('error', reject);
-    req.write(payload);
-    req.end();
-  });
-}
-
-if (OAUTH_CLIENT_ID && OAUTH_CLIENT_SECRET) {
-  app.get('/auth', (req, res) => {
-    const redirectUri = `https://${req.get('host')}/callback`;
-    const url =
-      'https://github.com/login/oauth/authorize' +
-      `?client_id=${encodeURIComponent(OAUTH_CLIENT_ID)}` +
-      // public_repo is enough for a public repo; use 'repo' if it goes private.
-      '&scope=public_repo' +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    res.redirect(url);
-  });
-
-  app.get('/callback', async (req, res) => {
-    try {
-      const data = await githubExchange(req.query.code);
-      const ok = Boolean(data.access_token);
-      const result = ok
-        ? { token: data.access_token, provider: 'github' }
-        : { error: data.error_description || data.error || 'Authentication failed' };
-      const message = `authorization:github:${ok ? 'success' : 'error'}:${JSON.stringify(result)}`;
-      // JSON.stringify makes a safe JS string literal; escape < to avoid </script>.
-      const safe = JSON.stringify(message).replace(/</g, '\\u003c');
-      res
-        .set('Content-Type', 'text/html')
-        .send(
-          `<!doctype html><body><script>
-  (function () {
-    var message = ${safe};
-    function receive(e) {
-      window.opener.postMessage(message, e.origin);
-      window.removeEventListener('message', receive, false);
-    }
-    window.addEventListener('message', receive, false);
-    window.opener.postMessage('authorizing:github', '*');
-  })();
-</script></body>`
-        );
-    } catch {
-      res.status(500).send('OAuth exchange failed');
-    }
-  });
-}
 
 /**
  * Mount list + single-entry routes for a markdown content directory.
