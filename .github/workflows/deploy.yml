@@ -77,11 +77,18 @@ jobs:
           GANDI_REMOTE: ${{ secrets.GANDI_GIT_REMOTE }}
         run: |
           GANDI_HOST=$(echo "$GANDI_REMOTE" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
+          GANDI_TARGET=$(echo "$GANDI_REMOTE" | sed -E 's|^git\+ssh://||; s|/[^/]*$||')   # user@host
+          GANDI_REPO=$(echo "$GANDI_REMOTE" | sed -E 's|.*/||')                            # default.git
           mkdir -p ~/.ssh
           ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           printf '#!/bin/sh\nprintf "%%s\\n" "$GANDI_TOKEN"\n' > "$RUNNER_TEMP/askpass.sh"
           chmod +x "$RUNNER_TEMP/askpass.sh"
+          export SSH_ASKPASS="$RUNNER_TEMP/askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=:0
+          export GIT_SSH_COMMAND="ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1"
+          # 1. push code to the Gandi git repo
           git remote add gandi "$GANDI_REMOTE"
-          SSH_ASKPASS="$RUNNER_TEMP/askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=:0 \
-          GIT_SSH_COMMAND="ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1" \
-            git push gandi HEAD:master --force
+          git push gandi HEAD:master --force
+          # 2. tell Gandi to check it out into the live webroot (git push alone doesn't)
+          ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no \
+              -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1 \
+              "$GANDI_TARGET" deploy "$GANDI_REPO"
