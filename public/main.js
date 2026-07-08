@@ -32,16 +32,25 @@ function postHero(image) {
 }
 
 // Slide the post hero image at a slower rate than the page as it scrolls.
-// ponytail: one passive, rAF-throttled scroll listener — cheapest real parallax.
+// Starts at the image's top and pans down. ponytail: one passive,
+// rAF-throttled scroll listener — cheapest real parallax.
 let heroTicking = false;
 function updateHeroParallax() {
   const img = document.querySelector('.post-hero img');
-  if (img) img.style.transform = `translate3d(0, ${window.scrollY * 0.3}px, 0)`;
+  if (img) img.style.transform = `translate3d(0, ${-window.scrollY * 0.3}px, 0)`;
   heroTicking = false;
 }
 window.addEventListener('scroll', () => {
   if (!heroTicking) { requestAnimationFrame(updateHeroParallax); heroTicking = true; }
 }, { passive: true });
+
+// Expose the header's real height as --nav-h so the hero can pin just below it.
+function setNavHeightVar() {
+  const header = document.querySelector('.site-header');
+  if (header) document.documentElement.style.setProperty('--nav-h', header.offsetHeight + 'px');
+}
+window.addEventListener('resize', setNavHeightVar);
+document.addEventListener('DOMContentLoaded', setNavHeightVar);
 
 /**
  * Build the tag filter bar — an "All" pill plus one pill per tag.
@@ -370,12 +379,17 @@ function renderAbout() {
   setApp(`
     <div class="content-col">
       <p class="section-heading">About me</p>
+      <div class="about-layout">
+      <img class="about-photo" src="/images/about.jpg" alt="Oscar Montiel">
       <div class="about-body">
-        <p>Hi, I'm Oscar.</p>
-        <p>I build technology things.</p>
-        <p>I also love music. Sometimes I take photos.</p>
-        <p>You can learn all about that here.</p>
-        <p>Or you can send me an <a href="mailto:me@oscarmontiel.net">email</a></p>
+        <p>Hi, I'm Oscar — a product and project lead based in Paris, originally from Mexico City.</p>
+        <p>For over ten years I've been building open-source, open-data, and civic-tech projects with international NGOs and research groups — the kind of work where the technology is there to serve something public. Most recently I designed and launched <a href="https://evaplatform.co" target="_blank" rel="noopener noreferrer">evaplatform.co</a> at the World Benchmarking Alliance, a self-assessment platform companies use to benchmark their sustainability.</p>
+        <p>Before that I led the tech behind Ranking Digital Rights' Big Tech Scorecard, ran Latin America programs for The Engine Room, and spent a few years at the Open Knowledge Foundation working on open fiscal data — OpenSpending, CKAN, and a lot of time helping governments publish data people could actually use. Back in Mexico City I worked at at Codeando México, the Lab for the City, and in a previous life I also did bike and pedestrian activism.</p>
+        <p>These days I mostly live in offline, but I still like writing code myself. (This site is a small experiment to test coding agents.)</p>
+        <p>I studied psychology before any of this, which is probably why I care more about what people actually need than about whatever's technically shiny.</p>
+        <p>I also love music, and sometimes I take photos.</p>
+        <p>You can always reach out via <a href="mailto:me@oscarmontiel.net">email</a>.</p>
+      </div>
       </div>
     </div>
   `);
