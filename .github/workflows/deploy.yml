@@ -81,9 +81,6 @@ jobs:
           ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           printf '#!/bin/sh\nprintf "%%s\\n" "$GANDI_TOKEN"\n' > "$RUNNER_TEMP/askpass.sh"
           chmod +x "$RUNNER_TEMP/askpass.sh"
-          echo "DEBUG token byte length: ${#GANDI_TOKEN}"
-          echo "DEBUG askpass output bytes: $(sh "$RUNNER_TEMP/askpass.sh" | wc -c)"
-          echo "DEBUG remote host: $GANDI_HOST"
           git remote add gandi "$GANDI_REMOTE"
           SSH_ASKPASS="$RUNNER_TEMP/askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=:0 \
           GIT_SSH_COMMAND="ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1" \
