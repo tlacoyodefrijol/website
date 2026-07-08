@@ -3,6 +3,7 @@ title: Hello World
 date: 2026-03-17
 slug: hello-world
 description: The first post on this site.
+image: /images/hello-world.jpg
 tags: [meta]
 ---
 

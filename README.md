@@ -36,13 +36,16 @@ title: Hello World
 date: 2026-07-08
 tags: [notes]
 description: A short summary.
+image: /images/hello-world.jpg   # optional
 ---
 
 Body in Markdown.
 ```
 
-`date` sorts the list (newest first). `projects`/`music`/`photography` also use
-`year`, and optional `url`, `artist`, `location`.
+`date` sorts the list (newest first). Optional `image` (put files in
+`public/images/`) shows as the card cover and a full-bleed post header that
+scrolls away. `projects`/`music`/`photography` also use `year`, and optional
+`url`, `artist`, `location`.
 
 ## Deploy
 

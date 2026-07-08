@@ -18,6 +18,17 @@ const SOCIAL_LINKS = [
 // ---------------------------------------------------------------------------
 function setApp(html) {
   document.getElementById('app').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+/**
+ * Full-bleed post header image. It's sticky at the top and sits behind the
+ * article, so the body (opaque bg) scrolls up over it — a CSS-only parallax
+ * that makes the image "disappear". Returns '' when the post has no image.
+ */
+function postHero(image) {
+  if (!image) return '';
+  return `<div class="post-hero"><img src="${esc(image)}" alt=""></div>`;
 }
 
 /**
@@ -103,7 +114,8 @@ async function renderEntry(section, slug, buildMeta) {
   const sectionLabel = section.charAt(0).toUpperCase() + section.slice(1);
 
   setApp(`
-    <div class="post-single">
+    ${postHero(meta.image)}
+    <div class="post-single${meta.image ? ' has-hero' : ''}">
       <a href="#${section}" class="back-link">← ${sectionLabel}</a>
       <header class="post-single-header">
         ${buildMeta(meta)}
@@ -137,11 +149,14 @@ async function renderHome() {
     : '';
 
   const cards = posts.map(p => `
-    <article class="post-card">
-      <span class="post-date">${formatDate(p.date)}</span>
-      <h2 class="post-card-title"><a href="#thoughts/${p.slug}">${esc(p.title)}</a></h2>
-      ${p.description ? `<p class="post-card-excerpt">${esc(p.description)}</p>` : ''}
-      ${renderTags(p.tags, '#thoughts/all')}
+    <article class="post-card${p.image ? ' has-image' : ''}">
+      ${p.image ? `<a href="#thoughts/${p.slug}" class="post-card-image"><img src="${esc(p.image)}" alt="" loading="lazy"></a>` : ''}
+      <div class="post-card-body">
+        <span class="post-date">${formatDate(p.date)}</span>
+        <h2 class="post-card-title"><a href="#thoughts/${p.slug}">${esc(p.title)}</a></h2>
+        ${p.description ? `<p class="post-card-excerpt">${esc(p.description)}</p>` : ''}
+        ${renderTags(p.tags, '#thoughts/all')}
+      </div>
     </article>
   `).join('');
 
@@ -224,7 +239,8 @@ async function renderPost(slug) {
   const body = marked.parse(content);
 
   setApp(`
-    <div class="post-single">
+    ${postHero(meta.image)}
+    <div class="post-single${meta.image ? ' has-hero' : ''}">
       <a href="#thoughts/all" class="back-link">← All thoughts</a>
       <header class="post-single-header">
         <span class="post-single-date">${formatDate(meta.date)}</span>
