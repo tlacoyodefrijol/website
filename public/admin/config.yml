@@ -1,0 +1,78 @@
+backend:
+  name: github
+  repo: tlacoyodefrijol/website
+  branch: main
+  # OAuth relay lives on the site itself (see /auth and /callback in index.js)
+  base_url: https://oscarmontiel.net
+  auth_endpoint: auth
+
+# Images land in public/images and are referenced from the site as /images/…
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: posts
+    label: Thoughts
+    folder: posts
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: slug, label: Slug (used in the URL and filename), widget: string }
+      - { name: date, label: Date, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD }
+      - { name: description, label: Description, widget: string, required: false }
+      - { name: image, label: Header image, widget: image, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: projects
+    label: Projects
+    folder: projects
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: slug, label: Slug, widget: string }
+      - { name: year, label: Year, widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD, required: false }
+      - { name: description, label: Description, widget: string, required: false }
+      - { name: url, label: Project URL, widget: string, required: false }
+      - { name: image, label: Header image, widget: image, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: music
+    label: Music
+    folder: music
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: slug, label: Slug, widget: string }
+      - { name: year, label: Year, widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD, required: false }
+      - { name: artist, label: Artist, widget: string, required: false }
+      - { name: url, label: Listen URL, widget: string, required: false }
+      - { name: image, label: Header image, widget: image, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: photography
+    label: Photography
+    folder: photography
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: slug, label: Slug, widget: string }
+      - { name: year, label: Year, widget: string, required: false }
+      - { name: date, label: Date, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD, required: false }
+      - { name: location, label: Location, widget: string, required: false }
+      - { name: url, label: Gallery URL, widget: string, required: false }
+      - { name: image, label: Header image, widget: image, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: body, label: Body, widget: markdown }
