@@ -23,7 +23,11 @@ collections:
       - { name: date, label: Date, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD }
       - { name: description, label: Description, widget: string, required: false }
       - { name: image, label: Header image, widget: image, required: false }
-      - { name: tags, label: Tags, widget: list, required: false }
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        field: { name: tag, label: Tag, widget: string }
       - { name: body, label: Body, widget: markdown }
 
   - name: projects
@@ -40,7 +44,11 @@ collections:
       - { name: description, label: Description, widget: string, required: false }
       - { name: url, label: Project URL, widget: string, required: false }
       - { name: image, label: Header image, widget: image, required: false }
-      - { name: tags, label: Tags, widget: list, required: false }
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        field: { name: tag, label: Tag, widget: string }
       - { name: body, label: Body, widget: markdown }
 
   - name: music
@@ -57,7 +65,11 @@ collections:
       - { name: artist, label: Artist, widget: string, required: false }
       - { name: url, label: Listen URL, widget: string, required: false }
       - { name: image, label: Header image, widget: image, required: false }
-      - { name: tags, label: Tags, widget: list, required: false }
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        field: { name: tag, label: Tag, widget: string }
       - { name: body, label: Body, widget: markdown }
 
   - name: photography
@@ -74,5 +86,9 @@ collections:
       - { name: location, label: Location, widget: string, required: false }
       - { name: url, label: Gallery URL, widget: string, required: false }
       - { name: image, label: Header image, widget: image, required: false }
-      - { name: tags, label: Tags, widget: list, required: false }
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        field: { name: tag, label: Tag, widget: string }
       - { name: body, label: Body, widget: markdown }
