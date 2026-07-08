@@ -367,6 +367,26 @@ function router() {
 }
 
 // ---------------------------------------------------------------------------
+// Theme toggle — light/dark, persisted in localStorage (default: dark)
+// ---------------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('.theme-toggle');
+  if (!btn) return;
+  const root = document.documentElement;
+  const paint = () => {
+    const isLight = root.getAttribute('data-theme') === 'light';
+    btn.textContent = isLight ? '☾ Dark mode' : '☀ Light mode';
+  };
+  paint();
+  btn.addEventListener('click', () => {
+    const isLight = root.getAttribute('data-theme') === 'light';
+    if (isLight) { root.removeAttribute('data-theme'); localStorage.setItem('theme', 'dark'); }
+    else         { root.setAttribute('data-theme', 'light'); localStorage.setItem('theme', 'light'); }
+    paint();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Hamburger toggle (tablet / mobile)
 // ---------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {

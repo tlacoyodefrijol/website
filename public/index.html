@@ -8,6 +8,11 @@
   <title>Oscar Montiel</title>
   <meta name="description" content="Thoughts and other things.">
   <meta name="referrer" content="no-referrer">
+  <!-- Apply saved theme before paint to avoid a flash -->
+  <script>
+    if (localStorage.getItem('theme') === 'light')
+      document.documentElement.setAttribute('data-theme', 'light');
+  </script>
   <link rel="stylesheet" href="/style.min.css">
 </head>
 <body>
@@ -26,6 +31,7 @@
       <a href="#music"        id="nav-music">Music</a>
       <a href="#photography"  id="nav-photography">Photography</a>
       <a href="#about"        id="nav-about">About me</a>
+      <button class="theme-toggle" type="button" aria-label="Switch between light and dark theme"></button>
     </nav>
   </header>
 
