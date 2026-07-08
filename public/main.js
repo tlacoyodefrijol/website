@@ -136,7 +136,7 @@ async function renderHome() {
        </ul>`
     : '';
 
-  const cards = posts.slice(0, 3).map(p => `
+  const cards = posts.map(p => `
     <article class="post-card">
       <span class="post-date">${formatDate(p.date)}</span>
       <h2 class="post-card-title"><a href="#thoughts/${p.slug}">${esc(p.title)}</a></h2>
@@ -146,8 +146,7 @@ async function renderHome() {
   `).join('');
 
   const galleryHtml = posts.length
-    ? `<div class="home-gallery">${cards}</div>
-       <a href="#thoughts/all" class="all-link">All thoughts →</a>`
+    ? `<div class="home-gallery">${cards}</div>`
     : `<p class="empty">Nothing here yet.</p>`;
 
   setApp(`
@@ -157,7 +156,7 @@ async function renderHome() {
         ${socialHtml}
       </section>
       <section>
-        <p class="section-heading">Recent thoughts</p>
+        <p class="section-heading">Thoughts</p>
         ${galleryHtml}
       </section>
     </div>
