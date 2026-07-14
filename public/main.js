@@ -4,7 +4,7 @@ import { marked } from 'https://cdn.jsdelivr.net/npm/marked@13.0.3/lib/marked.es
 // ---------------------------------------------------------------------------
 // Edit these to personalise the home page
 // ---------------------------------------------------------------------------
-const TAGLINE = "Hi, I'm Oscar. I build things.";
+const TAGLINE = "Hi, I'm Oscar. I build tech things.";
 
 const SOCIAL_LINKS = [
   { label: 'GitHub', url: 'https://github.com/tlacoyodefrijol' },
