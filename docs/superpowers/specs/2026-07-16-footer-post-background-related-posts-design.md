@@ -111,3 +111,83 @@ Heading: "Related posts", using the existing `.section-heading` style
 - `src/style.css` — footer styles, `.post-textbg`, `.related-posts`
   section heading spacing (reuses `.post-card` — no new card CSS).
 - `public/style.min.css` — rebuilt via `npm run css:build`.
+
+## Implementation notes
+
+Built directly from this spec (skipped a separate implementation-plan
+document per user instruction — this section is the record of what
+actually happened, written after the fact instead of planned before it).
+
+**Footer** — `public/index.html:38` gets a static `<footer id="site-footer">`
+placeholder, a sibling of `#app` rather than injected by `setApp()` on
+every route change. Reasoning: the footer's content is 100% static (no
+per-page data), so re-rendering it on every navigation would only risk a
+loading-state flash for zero benefit. `renderFooter()` in `main.js` runs
+once on `DOMContentLoaded` instead.
+
+Deviation from the spec's "two nav columns": `index.html`'s `.site-nav`
+currently has Projects/Music/Photography commented out ("Hidden
+2026-07-08 ... routes/render code still live in main.js; uncomment to
+restore"), leaving only Thoughts and About actually live. Built the
+footer's `FOOTER_LINKS` to mirror that — two links, one row, not two
+columns of a fuller sitemap — rather than resurrecting hidden sections in
+the footer that aren't in the header. `FOOTER_LINKS` is a small array
+literal in `main.js`; uncommenting the header nav and adding entries there
+is a one-line addition, not a redesign.
+
+Social icons: hand-rolled inline SVGs (GitHub mark, envelope) in a
+`FOOTER_ICONS` map keyed by the existing `SOCIAL_LINKS` labels — no icon
+font/library dependency.
+
+**Post background** — implemented as a style change to the *existing*
+`.post-cover .post-single` selector rather than a new `.post-textbg`
+wrapper element. `.post-single` inside `.post-cover` already contains
+exactly the text-bearing content (title, tags, body, related posts, prev/
+next nav) and excludes the hero image (a sibling, outside `.post-cover`)
+and the footer (outside `#app` entirely) — so it already had the right
+boundaries; it just needed a background. Added
+`color-mix(in srgb, var(--bg) 92%, transparent)` and `border-radius: 12px`
+to that rule instead of introducing a new div. Verified in-browser (both
+themes): text is crisply readable, the animated background stays visible
+in the margins on either side of the content column.
+
+**Related posts** — implemented as specified: `relatedPosts()` ranks by
+shared-tag count then recency, top 3, and `renderPost()` fetches
+`/api/thoughts` (already fetched there for the "Next" link — extended the
+same `try` block rather than adding a second fetch). Extracted the
+homepage's inline post-card markup into a shared `postCard()` function
+used by both `renderHome()` and the new related-posts section, so they
+can't visually drift apart. Confirmed empty-state: with one post on the
+site today, the section correctly doesn't render.
+
+**About page** — untouched, per the "leave it as-is" decision.
+
+**Verification**: `npm test` — 66/66 passing. Checked in-browser (dev
+server) on home, the hello-world post, and About, in both dark and light
+themes: footer renders on all three, post-background panel reads cleanly
+against the animation, related-posts section is absent (as expected with
+one post). Not yet committed/pushed — holding per established workflow
+until asked.
+
+### Follow-up round
+
+Three more requests landed after the initial build, all implemented and
+verified the same way:
+
+1. **`.post-single` was still only 92% opaque** — changed to a fully
+   solid `background: var(--bg)` (`src/style.css`), matching the fully
+   solid treatment given to home-page cards below. Text now sits on
+   completely solid ground; the animation is still visible in the margins
+   around the panel, which was the actual goal.
+2. **Home-page post cards were fully transparent** — `.post-card` had no
+   `background` at all, so it sat directly over the animated canvas.
+   Added `background: var(--surface)` — the same token already used for
+   the footer and tag pills, one line, no new color introduced. This also
+   improves the related-posts cards for free, since they reuse
+   `.post-card`.
+3. **Removed the GitHub/Email text links from the home hero** — deleted
+   `renderHome()`'s `socialHtml` block and the now-dead `.social-links`
+   CSS. Made the footer's social icons the sole home for these links and
+   more prominent: 40px circular buttons with a border, instead of small
+   18px bare icons, with a tinted hover state matching the site's accent
+   color.
