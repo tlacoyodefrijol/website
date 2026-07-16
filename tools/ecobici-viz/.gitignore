@@ -1,0 +1,5 @@
+.cache/
+__pycache__/
+*.json
+*.mp4
+*.webp
