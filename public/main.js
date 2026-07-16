@@ -28,7 +28,7 @@ function setApp(html) {
  */
 function postHero(image) {
   if (!image) return '';
-  return `<div class="post-hero"><img src="${esc(image)}" alt=""></div>`;
+  return `<div class="post-hero-wrap"><div class="post-hero"><img src="${esc(image)}" alt=""></div></div>`;
 }
 
 // Slide the post hero image at a slower rate than the page as it scrolls.

@@ -70,6 +70,32 @@ body {
 a { color: inherit; }
 
 /* =============================================================
+   BACKGROUND — Ecobici trip trace (see background.js). Fixed behind
+   everything; header/#app are positioned above it in the stacking order.
+   ============================================================= */
+#bgCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dims the animation so page text stays readable on top of it */
+#bgOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+#app { position: relative; z-index: 1; }
+
+/* =============================================================
    HEADER — full-width sticky top bar: name left, nav right
    ============================================================= */
 .site-header {
@@ -322,14 +348,21 @@ a { color: inherit; }
 
 /* Full-bleed hero. The image is oversized and translated on scroll (see
    main.js) so it slides at a slower rate than the page — a parallax that
-   glides up and away. Only present when the post has an image. */
+   glides up and away. Only present when the post has an image.
+   The wrap is a bit taller than the hero so the sticky pin releases once
+   the parallax pan finishes, instead of trailing the whole article — the
+   background behind the post (see #bgCanvas) needs it to let go. */
+.post-hero-wrap {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-top: -3.5rem;          /* cancel the #app top padding */
+  height: 80vh;
+}
 .post-hero {
   position: sticky;             /* pinned below the nav; article scrolls over it */
   top: var(--nav-h, 60px);
   z-index: 0;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-top: -3.5rem;          /* cancel the #app top padding */
   height: 58vh;
   overflow: hidden;
   background: var(--surface);
@@ -351,7 +384,7 @@ a { color: inherit; }
   z-index: 1;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
 }
 .post-cover .post-single {
   max-width: 720px;
