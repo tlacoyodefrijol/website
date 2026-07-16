@@ -191,3 +191,12 @@ verified the same way:
    more prominent: 40px circular buttons with a border, instead of small
    18px bare icons, with a tinted hover state matching the site's accent
    color.
+4. **Same panel treatment on the About page text** — `.about-body` gets
+   `background: var(--surface)`, `border-radius: 12px`, and padding,
+   matching the same card language now used for `.post-single` and
+   `.post-card`. About has no animated background to contrast against
+   (out of scope per the original design), so this uses `--surface`
+   rather than `--bg` — otherwise it would be invisible against the
+   plain page background. The contrast is intentionally subtle (same
+   `--surface` shade already used for tag pills and code blocks
+   elsewhere on the site), not a bug.

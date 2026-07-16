@@ -676,6 +676,9 @@ a.tag:hover { opacity: 0.82; }
   line-height: 1.8;
   color: var(--text);
   max-width: 100%;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 2rem clamp(1.25rem, 4vw, 2rem);
 }
 .about-body p { margin-bottom: 1rem; }
 .about-body a { color: #e76f51; text-decoration: underline; text-underline-offset: 2px; }
