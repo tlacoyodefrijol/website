@@ -14,8 +14,7 @@
     "css:watch": "watch \"npm run css:build\" src",
     "start": "node index.js",
     "dev": "npm-run-all --parallel start css:watch",
-    "build:static": "node scripts/build-static-api.js",
-    "deploy": "npm run build:static && bash scripts/deploy.sh"
+    "build:static": "node scripts/build-static-api.js"
   },
   "devDependencies": {
     "clean-css-cli": "^5.6.3",

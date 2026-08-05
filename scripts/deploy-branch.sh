@@ -8,9 +8,11 @@ BRANCH="${DEPLOY_BRANCH:-ovh-deploy}"
 WORKTREE=".deploy-worktree"
 
 cd "$(dirname "$0")/.."
+trap 'git worktree remove "$WORKTREE" --force 2>/dev/null || true' EXIT
 npm run build:static
 
 git fetch origin "$BRANCH" 2>/dev/null || true
+git worktree remove "$WORKTREE" --force 2>/dev/null || true
 rm -rf "$WORKTREE"
 if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
   git worktree add -B "$BRANCH" "$WORKTREE" "origin/$BRANCH"
@@ -28,5 +30,3 @@ else
   git -C "$WORKTREE" commit -m "deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ)" -q
   git -C "$WORKTREE" push origin "$BRANCH" --force
 fi
-
-git worktree remove "$WORKTREE" --force
