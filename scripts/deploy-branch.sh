@@ -15,7 +15,7 @@ rm -rf "$WORKTREE"
 if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
   git worktree add -B "$BRANCH" "$WORKTREE" "origin/$BRANCH"
 else
-  git worktree add -B "$BRANCH" "$WORKTREE"
+  git worktree add --detach "$WORKTREE"
   git -C "$WORKTREE" checkout --orphan "$BRANCH"
   git -C "$WORKTREE" rm -rf . >/dev/null
 fi
