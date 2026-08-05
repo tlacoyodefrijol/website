@@ -20,7 +20,7 @@ app.get('/ping', (_req, res) => res.send('pong'));
  */
 function mountSection(route, dir) {
   // List
-  app.get(`/api/${route}`, async (_req, res) => {
+  app.get(`/api/${route}.json`, async (_req, res) => {
     const files = await readdir(dir);
     const items = await Promise.all(
       files
@@ -35,7 +35,7 @@ function mountSection(route, dir) {
   });
 
   // Single entry
-  app.get(`/api/${route}/:slug`, async (req, res) => {
+  app.get(`/api/${route}/:slug.json`, async (req, res) => {
     const slug     = path.basename(req.params.slug);
     const filepath = path.join(dir, `${slug}.md`);
     try {

@@ -106,7 +106,7 @@ function tagFilterBar(allTags, active, baseUrl) {
  * Fetch a section list from the API. Returns the parsed array or throws.
  */
 async function fetchList(section) {
-  const resp = await fetch(`/api/${section}`);
+  const resp = await fetch(`/api/${section}.json`);
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   return resp.json();
 }
@@ -152,7 +152,7 @@ async function renderEntry(section, slug, buildMeta) {
   setApp('<p class="loading">Loading…</p>');
   let data;
   try {
-    const resp = await fetch(`/api/${section}/${encodeURIComponent(slug)}`);
+    const resp = await fetch(`/api/${section}/${encodeURIComponent(slug)}.json`);
     if (resp.status === 404) { setApp('<p class="error">Not found.</p>'); return; }
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     data = await resp.json();

@@ -22,20 +22,20 @@ describe('GET /ping', () => {
  * seedSlug — a slug known to exist in the seed file for that section.
  */
 function describeListEndpoint(route, seedSlug) {
-  describe(`GET /api/${route}`, () => {
+  describe(`GET /api/${route}.json`, () => {
     it('returns 200 with a JSON array', async () => {
-      const res = await request(app).get(`/api/${route}`);
+      const res = await request(app).get(`/api/${route}.json`);
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
 
     it('includes at least the seed entry', async () => {
-      const res = await request(app).get(`/api/${route}`);
+      const res = await request(app).get(`/api/${route}.json`);
       expect(res.body.length).toBeGreaterThanOrEqual(1);
     });
 
     it('every entry has title, date and slug', async () => {
-      const res = await request(app).get(`/api/${route}`);
+      const res = await request(app).get(`/api/${route}.json`);
       for (const entry of res.body) {
         expect(entry).toHaveProperty('title');
         expect(entry).toHaveProperty('date');
@@ -46,7 +46,7 @@ function describeListEndpoint(route, seedSlug) {
     });
 
     it('entries are sorted newest-first', async () => {
-      const res   = await request(app).get(`/api/${route}`);
+      const res   = await request(app).get(`/api/${route}.json`);
       const dates = res.body.map(e => new Date(e.date).getTime());
       for (let i = 0; i < dates.length - 1; i++) {
         expect(dates[i]).toBeGreaterThanOrEqual(dates[i + 1]);
@@ -54,35 +54,35 @@ function describeListEndpoint(route, seedSlug) {
     });
   });
 
-  describe(`GET /api/${route}/:slug`, () => {
+  describe(`GET /api/${route}/:slug.json`, () => {
     it('returns 200 with meta and content for a known slug', async () => {
-      const res = await request(app).get(`/api/${route}/${seedSlug}`);
+      const res = await request(app).get(`/api/${route}/${seedSlug}.json`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('meta');
       expect(res.body).toHaveProperty('content');
     });
 
     it('meta contains title and slug', async () => {
-      const res = await request(app).get(`/api/${route}/${seedSlug}`);
+      const res = await request(app).get(`/api/${route}/${seedSlug}.json`);
       const { meta } = res.body;
       expect(typeof meta.title).toBe('string');
       expect(meta.slug).toBe(seedSlug);
     });
 
     it('content is a non-empty string', async () => {
-      const res = await request(app).get(`/api/${route}/${seedSlug}`);
+      const res = await request(app).get(`/api/${route}/${seedSlug}.json`);
       expect(typeof res.body.content).toBe('string');
       expect(res.body.content.length).toBeGreaterThan(0);
     });
 
     it('returns 404 for an unknown slug', async () => {
-      const res = await request(app).get(`/api/${route}/does-not-exist-xyz`);
+      const res = await request(app).get(`/api/${route}/does-not-exist-xyz.json`);
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty('error');
     });
 
     it('does not expose files outside the content dir (directory traversal)', async () => {
-      const res = await request(app).get(`/api/${route}/../../package`);
+      const res = await request(app).get(`/api/${route}/../../package.json`);
       expect(res.status).toBe(404);
     });
   });
