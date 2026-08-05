@@ -26,26 +26,21 @@ jobs:
       - run: npm test
 
   # -------------------------------------------------------------------
-  # Deploy to Gandi Simple Hosting — only on pushes to main
-  #
-  # Required GitHub secrets:
-  #   GANDI_SSH_KEY    — contents of your private SSH key (the matching
-  #                      public key must be added in the Gandi control
-  #                      panel under Simple Hosting → SSH keys)
-  #   GANDI_GIT_REMOTE — full git remote URL from Gandi, e.g.
-  #                      git+ssh://<uuid>@git.sd6.gpaas.net/default.git
+  # Publish public/ (with a freshly rebuilt API snapshot) to the
+  # ovh-deploy branch — OVH's git integration tracks that branch as the
+  # doc root. Keeps CMS commits (raw markdown to main) flowing straight
+  # through to a live redeploy.
   # -------------------------------------------------------------------
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0          # full history so git push doesn't fail
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:
@@ -54,41 +49,8 @@ jobs:
 
       - run: npm ci
 
-      - name: Build CSS
-        run: npm run css:build
-
-      # Include the freshly built CSS in what gets pushed to Gandi.
-      # Gandi runs `npm install` + `npm start` but does not run build scripts.
-      - name: Commit built assets
+      - name: Publish ovh-deploy branch
         run: |
           git config user.email "deploy@github-actions"
           git config user.name "GitHub Actions"
-          git add -f public/style.min.css
-          git diff --staged --quiet || git commit -m "ci: build assets [skip ci]"
-
-      # Gandi Simple Hosting deploys from the 'master' branch. It authenticates
-      # git over SSH with a personal access token used as the SSH *password*
-      # (Gandi's default deploy-token method). We feed it non-interactively via
-      # SSH_ASKPASS — robust to the server's prompt wording, unlike sshpass.
-      # Secret GANDI_TOKEN = the token from the hosting's "Deploy your code" panel.
-      - name: Push to Gandi
-        env:
-          GANDI_TOKEN: ${{ secrets.GANDI_TOKEN }}
-          GANDI_REMOTE: ${{ secrets.GANDI_GIT_REMOTE }}
-        run: |
-          GANDI_HOST=$(echo "$GANDI_REMOTE" | sed 's|^[^/]*//[^@]*@||;s|/.*||')
-          GANDI_TARGET=$(echo "$GANDI_REMOTE" | sed -E 's|^git\+ssh://||; s|/[^/]*$||')   # user@host
-          GANDI_REPO=$(echo "$GANDI_REMOTE" | sed -E 's|.*/||')                            # default.git
-          mkdir -p ~/.ssh
-          ssh-keyscan -H "$GANDI_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          printf '#!/bin/sh\nprintf "%%s\\n" "$GANDI_TOKEN"\n' > "$RUNNER_TEMP/askpass.sh"
-          chmod +x "$RUNNER_TEMP/askpass.sh"
-          export SSH_ASKPASS="$RUNNER_TEMP/askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=:0
-          export GIT_SSH_COMMAND="ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1"
-          # 1. push code to the Gandi git repo
-          git remote add gandi "$GANDI_REMOTE"
-          git push gandi HEAD:master --force
-          # 2. tell Gandi to check it out into the live webroot (git push alone doesn't)
-          ssh -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no \
-              -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=1 \
-              "$GANDI_TARGET" deploy "$GANDI_REPO"
+          bash scripts/deploy-branch.sh
