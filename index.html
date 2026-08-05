@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17191d">
+  <title>Oscar Montiel</title>
+  <meta name="description" content="Thoughts and other things.">
+  <meta name="referrer" content="no-referrer">
+  <!-- Apply saved theme before paint to avoid a flash -->
+  <script>
+    if (localStorage.getItem('theme') === 'light')
+      document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+  <link rel="stylesheet" href="/style.min.css">
+</head>
+<body>
+
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+  <div id="bgOverlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a href="#thoughts" class="site-name">Oscar Montiel</a>
+
+    <nav class="site-nav">
+      <a href="#thoughts"     id="nav-thoughts">Thoughts</a>
+      <!-- Hidden 2026-07-08 — Projects, Music & Photography removed from nav.
+           Routes/render code still live in main.js; uncomment to restore. -->
+      <!-- <a href="#projects"     id="nav-projects">Projects</a> -->
+      <!-- <a href="#music"        id="nav-music">Music</a> -->
+      <!-- <a href="#photography"  id="nav-photography">Photography</a> -->
+      <a href="#about"        id="nav-about">About me</a>
+      <button class="theme-toggle" type="button" aria-label="Switch between light and dark theme"></button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module" src="/main.js"></script>
+  <script src="/background.js" defer></script>
+
+</body>
+</html>
