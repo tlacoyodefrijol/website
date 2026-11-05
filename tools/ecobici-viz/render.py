@@ -15,7 +15,6 @@ import random
 import shutil
 import subprocess
 import sys
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -66,7 +65,9 @@ def project(stations, W, H):
     kx = math.cos(math.radians(lat0))
     geo_w = (max(lons) - min(lons)) * kx
     geo_h = max(lats) - min(lats)
-    scale = max(W / geo_w, H / geo_h) * 1.08
+    # ponytail: degenerate span (one station, or all on one meridian) falls back to the other axis / 1.
+    scale = max(W / geo_w if geo_w else 0, H / geo_h if geo_h else 0) or 1
+    scale *= 1.08
 
     pts = []
     for lat, lon in stations:
@@ -76,10 +77,12 @@ def project(stations, W, H):
     return pts
 
 
-def render(data, out_path, W, H, fps, duration, loop_seconds, theme):
+def frames(data, W, H, fps, duration, loop_seconds, theme, seed=0):
+    """Yield (H, W, 3) uint8 frames. Same seed + data -> identical frames."""
     mode = MODE[theme]
     palette = [hex_to_rgb(c) for c in mode["colors"]]
     stations_px = project(data["stations"], W, H)
+    rng = random.Random(seed)
 
     sorted_trips = sorted(
         ((o, d, ((sec % DAY_SECONDS) / DAY_SECONDS) * loop_seconds) for o, d, sec in data["trips"]),
@@ -91,34 +94,38 @@ def render(data, out_path, W, H, fps, duration, loop_seconds, theme):
     # Fade tuned at REF_FPS; rescale so the same wall-clock decay holds at any output fps.
     fade = 1 - (1 - mode["fade"]) ** (REF_FPS / fps)
     bg_arr = np.array(mode["bg"], dtype=np.float32)
-
     canvas = np.full((H, W, 3), mode["bg"], dtype=np.float32)
+    stroke = Image.new("RGBA", (W, H))
+    draw = ImageDraw.Draw(stroke)
 
     active: list[Trip] = []
     ptr = 0
-    n_frames = int(duration * fps)
-    frame_dir = Path(tempfile.mkdtemp(prefix="ecobici-frames-"))
+    prev_cycle = 0.0
 
-    for f in range(n_frames):
-        elapsed = f / fps
-        loop_t = elapsed % loop_seconds
-        cycle_base = elapsed - loop_t
-        if ptr > 0 and loop_t < sorted_trips[ptr - 1][2]:
-            ptr = 0  # wrapped to a new lap
-        while ptr < len(sorted_trips) and sorted_trips[ptr][2] <= loop_t and len(active) < MAX_ACTIVE:
+    def spawn_until(limit, cycle_base):
+        nonlocal ptr
+        while ptr < len(sorted_trips) and sorted_trips[ptr][2] <= limit and len(active) < MAX_ACTIVE:
             o, d, spawn = sorted_trips[ptr]
             sx, sy = stations_px[o]
             ex, ey = stations_px[d]
-            dist = math.hypot(ex - sx, ey - sy)
-            travel = min(MAX_TRAVEL, max(MIN_TRAVEL, dist / SPEED_PX_S))
-            color = random.choices(palette, weights=mode["weights"])[0]
+            travel = min(MAX_TRAVEL, max(MIN_TRAVEL, math.hypot(ex - sx, ey - sy) / SPEED_PX_S))
+            color = rng.choices(palette, weights=mode["weights"])[0]
             active.append(Trip(o, d, cycle_base + spawn, travel, color, (sx, sy)))
             ptr += 1
 
-        canvas[:] = canvas * (1 - fade) + bg_arr * fade  # source-over backdrop fill
+    for f in range(int(duration * fps)):
+        elapsed = f / fps
+        loop_t = elapsed % loop_seconds
+        cycle_base = elapsed - loop_t
+        if cycle_base > prev_cycle:  # new lap: finish the old lap's tail, then restart
+            spawn_until(loop_seconds, prev_cycle)
+            ptr, prev_cycle = 0, cycle_base
+        spawn_until(loop_t, cycle_base)
 
-        stroke = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(stroke)
+        canvas *= 1 - fade
+        canvas += bg_arr * fade  # source-over backdrop fill
+
+        stroke.paste((0, 0, 0, 0), (0, 0, W, H))
         kept = []
         for t in active:
             progress = (elapsed - t.spawn_abs) / t.travel
@@ -130,45 +137,45 @@ def render(data, out_path, W, H, fps, duration, loop_seconds, theme):
             sx, sy = stations_px[t.o]
             ex, ey = stations_px[t.d]
             nx, ny = sx + (ex - sx) * progress, sy + (ey - sy) * progress
-            fade_in_out = min(1, min(progress, 1 - progress) * 6)
-            a = int(mode["base_alpha"] * fade_in_out * 255)
+            a = int(mode["base_alpha"] * min(1, min(progress, 1 - progress) * 6) * 255)
             if a > 0:
                 draw.line([t.last, (nx, ny)], fill=t.color + (a,), width=mode["line_width"])
             t.last = (nx, ny)
         active = kept
 
         # 'lighter' (additive) composite, matching background.js -- not normal alpha blending.
-        stroke_arr = np.asarray(stroke, dtype=np.float32)
-        stroke_rgb, stroke_a = stroke_arr[..., :3], stroke_arr[..., 3:4] / 255
-        canvas[:] = np.clip(canvas + stroke_rgb * stroke_a, 0, 255)
-
-        Image.fromarray(canvas.astype(np.uint8)).save(frame_dir / f"frame{f:04d}.jpg", quality=85)
-        if f % max(1, n_frames // 10) == 0:
-            print(f"  frame {f}/{n_frames}", file=sys.stderr)
-
-    encode(frame_dir, out_path, fps)
-    shutil.rmtree(frame_dir, ignore_errors=True)
+        s_arr = np.asarray(stroke, dtype=np.float32)
+        canvas += s_arr[..., :3] * (s_arr[..., 3:4] / 255)
+        np.clip(canvas, 0, 255, out=canvas)
+        yield canvas.astype(np.uint8)
 
 
-def encode(frame_dir: Path, out_path: str, fps: int):
+def encode(frame_iter, out_path, W, H, fps):
+    n = 0
     if out_path.endswith(".webp"):
-        if not shutil.which("img2webp"):
-            sys.exit("img2webp not found (brew install webp / apt install webp)")
-        frames = sorted(frame_dir.glob("*.jpg"))
-        subprocess.run(
-            ["img2webp", "-loop", "0", "-lossy", "-q", "75", "-m", "6", "-d", str(round(1000 / fps)),
-             *[str(f) for f in frames], "-o", out_path],
-            check=True,
-        )
+        # ponytail: holds every frame in RAM (~W*H*3 each); stream via img2webp if clips get long.
+        imgs = [Image.fromarray(a) for a in frame_iter]
+        n = len(imgs)
+        imgs[0].save(out_path, save_all=True, append_images=imgs[1:], duration=round(1000 / fps),
+                     loop=0, quality=75, method=6)
     else:
         if not shutil.which("ffmpeg"):
             sys.exit("ffmpeg not found")
-        subprocess.run(
-            ["ffmpeg", "-y", "-framerate", str(fps), "-i", str(frame_dir / "frame%04d.jpg"),
+        proc = subprocess.Popen(
+            ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
+             "-s", f"{W}x{H}", "-framerate", str(fps), "-i", "-",
              "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out_path],
-            check=True, capture_output=True,
+            stdin=subprocess.PIPE,
         )
-    print(f"Wrote {out_path}", file=sys.stderr)
+        try:
+            for a in frame_iter:
+                proc.stdin.write(a.tobytes())
+                n += 1
+        finally:
+            proc.stdin.close()
+            if proc.wait():
+                sys.exit(f"ffmpeg failed (exit {proc.returncode})")
+    print(f"Wrote {out_path} ({n} frames)", file=sys.stderr)
 
 
 def main():
@@ -181,10 +188,14 @@ def main():
     ap.add_argument("--duration", type=float, default=6, help="clip length in seconds")
     ap.add_argument("--loop-seconds", type=float, default=90, help="24h folded onto this many seconds, matching background.js")
     ap.add_argument("--theme", choices=["dark", "light"], default="dark")
+    ap.add_argument("--seed", type=int, default=0, help="color RNG seed; same seed = same clip")
     args = ap.parse_args()
 
     data = json.loads(Path(args.data).read_text())
-    render(data, args.out, args.width, args.height, args.fps, args.duration, args.loop_seconds, args.theme)
+    if args.width % 2 or args.height % 2:
+        sys.exit("--width/--height must be even (yuv420p)")
+    encode(frames(data, args.width, args.height, args.fps, args.duration, args.loop_seconds, args.theme, args.seed),
+           args.out, args.width, args.height, args.fps)
 
 
 if __name__ == "__main__":

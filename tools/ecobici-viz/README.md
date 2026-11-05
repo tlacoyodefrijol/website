@@ -17,7 +17,9 @@ GBFS station feed for coordinates. `render.py` takes `--theme light`,
 `--duration`, `--fps`, `--width`/`--height` if you want a non-default look;
 `--help` on either script lists the rest.
 
-Requires `ffmpeg` on PATH (`.mp4`) or `img2webp` (`.webp`).
+Requires `ffmpeg` on PATH for `.mp4`; `.webp` needs only Pillow. `--seed` makes renders reproducible.
+
+Tests: `python3 -m pytest test_render.py`
 
 Trips are folded onto a single day by time-of-day only, same as the site --
 picking a longer date range makes the loop busier, not longer.
